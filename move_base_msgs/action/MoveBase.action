@@ -1,0 +1,8 @@
+#goal definition
+geometry_msgs/Pose goal
+---
+#result definition
+int32 result_code
+---
+#feedback definition
+float64 progress
