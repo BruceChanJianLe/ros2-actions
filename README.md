@@ -19,6 +19,18 @@ int32 result_code
 float64 progress
 ```
 
+## Demo Node
+
+```bash
+# Terminal 1 (start move base action server)
+ros2 run move_base move_base_action_server_node
+```
+
+```bash
+# Terminal 2 (start move base action client)
+ros2 run move_base move_base_action_client_node
+```
+
 ## CLI Action Client
 
 ```bash
