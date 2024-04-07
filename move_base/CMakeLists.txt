@@ -34,7 +34,6 @@ foreach(pkg IN LISTS dependencies_pkgs)
   find_package(${pkg} REQUIRED)
 endforeach()
 
-
 # BUILD
 set(LIBRARY_NAME "move_base_action")
 # create action server
