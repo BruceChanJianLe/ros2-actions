@@ -54,3 +54,15 @@ ros2 action send_goal /move_base move_base_msgs/action/MoveBase "goal:
 # Alternatively,
 ros2 action send_goal /move_base move_base_msgs/action/MoveBase "{}" --feedback
 ```
+
+## Demo RQT
+
+```bash
+# Terminal 1 (start move base action server)
+ros2 run move_base move_base_action_server_node
+```
+
+```bash
+# Termianl 2
+ros2 run rqt_move_base_client rqt_move_base_client
+```
