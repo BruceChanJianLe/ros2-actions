@@ -37,7 +37,7 @@ namespace mb
       )
   {
     RCLCPP_INFO_STREAM(get_logger(), "Received request to cancel goal!");
-    (void)goal_handler;
+    // (void)goal_handler;
 
     return rclcpp_action::CancelResponse::ACCEPT;
   }
@@ -67,6 +67,7 @@ namespace mb
       {
         goal_handler->canceled(result);
         RCLCPP_INFO_STREAM(get_logger(), "Move base goal cancel at " << progress);
+        break;
       }
 
       // Update progress

@@ -37,7 +37,7 @@ endforeach()
 # BUILD
 set(LIBRARY_NAME "move_base_action")
 # create action server
-add_library(${LIBRARY_NAME}_server
+add_library(${LIBRARY_NAME}_server SHARED
   ./src/server/move_base_action_server.cpp
 )
 ament_target_dependencies(${LIBRARY_NAME}_server ${dependencies_pkgs})
@@ -51,7 +51,7 @@ rclcpp_components_register_node(${LIBRARY_NAME}_server
 )
 
 # create action client
-add_library(${LIBRARY_NAME}_client
+add_library(${LIBRARY_NAME}_client SHARED
   ./src/client/move_base_action_client.cpp
 )
 ament_target_dependencies(${LIBRARY_NAME}_client ${dependencies_pkgs})
