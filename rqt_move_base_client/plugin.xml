@@ -1,0 +1,19 @@
+<library path="rqt_move_base_client">
+  <class type="rqt_plugin::RQTMoveBaseClient" base_class_type="rqt_gui_cpp::Plugin">
+    <description>
+      This repository demonstrate custom rqt plugin on ROS2.
+    </description>
+    <qtgui>
+      <group>
+        <label>Visualization</label>
+        <icon type="theme">applications-graphics</icon>
+        <!-- Reference Link -->
+        <!-- https://gist.github.com/peteristhegreat/c0ca6e1a57e5d4b9cd0bb1d7b3be1d6a -->
+        <statustip>Move Base Client Plugin</statustip>
+      </group>
+      <label>Move Base Client</label>
+      <icon type="theme">image-x-generic</icon>
+      <statustip>A Move Base Client Plugin for action client example.</statustip>
+    </qtgui>
+  </class>
+</library>
