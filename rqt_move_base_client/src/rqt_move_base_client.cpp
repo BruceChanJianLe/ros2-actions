@@ -23,8 +23,6 @@ namespace rqt_plugin
     ui_.lineEditGoalX->setValidator(dv);
     ui_.lineEditGoalY->setValidator(dv);
 
-    // Get save value if available
-
     // ROS2 related declaration
     mb_action_clt_ = rclcpp_action::create_client<move_base_msgs::action::MoveBase>(node_, MB_SERVER_NAME);
     // Start short observation timer
@@ -41,6 +39,32 @@ namespace rqt_plugin
   }
 
   CustomWidget::~CustomWidget() {}
+
+  void CustomWidget::saveSettings([[maybe_unused]] qt_gui_cpp::Settings& plugin_settings, qt_gui_cpp::Settings& instance_settings) const
+  {
+    QVariant pose_x {ui_.lineEditGoalX->text().toDouble()};
+    instance_settings.setValue({"position_x"}, pose_x);
+
+    QVariant pose_y {ui_.lineEditGoalY->text().toDouble()};
+    instance_settings.setValue({"position_y"}, pose_y);
+  }
+
+  void CustomWidget::restoreSettings([[maybe_unused]] const qt_gui_cpp::Settings& plugin_settings, const qt_gui_cpp::Settings& instance_settings)
+  {
+    if (instance_settings.contains({"position_x"}))
+    {
+      QVariant pose_x {0.0};
+      pose_x = instance_settings.value({"position_x"}, pose_x);
+      ui_.lineEditGoalX->setText(QString::number(pose_x.toDouble()));
+    }
+
+    if (instance_settings.contains({"position_y"}))
+    {
+      QVariant pose_y {0.0};
+      pose_y = instance_settings.value({"position_y"}, pose_y);
+      ui_.lineEditGoalY->setText(QString::number(pose_y.toDouble()));
+    }
+  }
 
   void CustomWidget::on_lineEditGoalX_editingFinished()
   {
@@ -74,7 +98,14 @@ namespace rqt_plugin
 
   void CustomWidget::waitForMoveBaseServer(const bool verify)
   {
-    if (!is_srv_online_ || verify)
+    if (!rclcpp::ok())
+    {
+      timer_->cancel();
+      rclcpp::shutdown();
+      return;
+    }
+
+    if ((!is_srv_online_ || verify))
     {
       ui_.labelActionStatus->setText(QString::fromStdString(std::string{STATUS_MSG} + std::string{"offline"}));
       RCLCPP_INFO_STREAM(node_->get_logger(), "Waiting for move base action server not available after waiting.");
@@ -115,7 +146,7 @@ namespace rqt_plugin
     }
   }
 
-  void CustomWidget::feedbackCallback(std::shared_ptr<rclcpp_action::ClientGoalHandle<move_base_msgs::action::MoveBase>> goal_handler, const std::shared_ptr<const move_base_msgs::action::MoveBase::Feedback> feedback)
+  void CustomWidget::feedbackCallback([[maybe_unused]] std::shared_ptr<rclcpp_action::ClientGoalHandle<move_base_msgs::action::MoveBase>> goal_handler, const std::shared_ptr<const move_base_msgs::action::MoveBase::Feedback> feedback)
   {
     ui_.labelActionStatus->setText(QString::fromStdString(std::string{STATUS_MSG} + std::string{"running (" + std::to_string(feedback->progress) + "%"}));
   }
@@ -146,7 +177,7 @@ namespace rqt_plugin
 
   RQTMoveBaseClient::RQTMoveBaseClient()
     : rqt_gui_cpp::Plugin()
-    , widget_(0)
+    , widget_(nullptr)
   {
   }
 
@@ -164,25 +195,30 @@ namespace rqt_plugin
 
   RQTMoveBaseClient::~RQTMoveBaseClient()
   {
+  }
+
+  void RQTMoveBaseClient::shutdownPlugin()
+  {
     if(widget_)
     {
       delete widget_;
     }
   }
 
-  void RQTMoveBaseClient::shutdownPlugin()
-  {
-    ;
-  }
-
   void RQTMoveBaseClient::saveSettings(qt_gui_cpp::Settings& plugin_settings, qt_gui_cpp::Settings& instance_settings) const
   {
-    ;
+    if (widget_)
+    {
+      widget_->saveSettings(plugin_settings, instance_settings);
+    }
   }
 
   void RQTMoveBaseClient::restoreSettings(const qt_gui_cpp::Settings& plugin_settings, const qt_gui_cpp::Settings& instance_settings)
   {
-    ;
+    if (widget_)
+    {
+      widget_->restoreSettings(plugin_settings, instance_settings);
+    }
   }
 
 } // namespace rqt_plugin
