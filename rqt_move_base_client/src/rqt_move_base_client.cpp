@@ -195,14 +195,14 @@ namespace rqt_plugin
 
   RQTMoveBaseClient::~RQTMoveBaseClient()
   {
-  }
-
-  void RQTMoveBaseClient::shutdownPlugin()
-  {
     if(widget_)
     {
       delete widget_;
     }
+  }
+
+  void RQTMoveBaseClient::shutdownPlugin()
+  {
   }
 
   void RQTMoveBaseClient::saveSettings(qt_gui_cpp::Settings& plugin_settings, qt_gui_cpp::Settings& instance_settings) const
