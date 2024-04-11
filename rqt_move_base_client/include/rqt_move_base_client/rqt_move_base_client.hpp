@@ -48,6 +48,13 @@ namespace rqt_plugin
       void goalResponseCallback(const std::shared_ptr<rclcpp_action::ClientGoalHandle<move_base_msgs::action::MoveBase>>);
       void feedbackCallback(std::shared_ptr<rclcpp_action::ClientGoalHandle<move_base_msgs::action::MoveBase>>, const std::shared_ptr<const move_base_msgs::action::MoveBase::Feedback>);
       void resultCallback(const rclcpp_action::ClientGoalHandle<move_base_msgs::action::MoveBase>::WrappedResult);
+
+      template <typename T>
+      void actionClientGoalResponseCallback(const T t);
+      template <typename T, typename U>
+      void actionClientFeedbackCallback(T t, const U u);
+      template <typename T>
+      void actionClientResultCallback(const T t);
   };
 
   class RQTMoveBaseClient : public rqt_gui_cpp::Plugin

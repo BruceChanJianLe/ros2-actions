@@ -32,14 +32,14 @@ namespace rqt_plugin
     // Update action client callbacks
     send_goal_options_ = rclcpp_action::Client<move_base_msgs::action::MoveBase>::SendGoalOptions();
     send_goal_options_.goal_response_callback =
-      [this](const auto goal_handler){ goalResponseCallback(goal_handler); };
+      [this](const auto goal_handler){ actionClientGoalResponseCallback(goal_handler); };
     send_goal_options_.feedback_callback =
-      [this](auto goal_handler, const auto fd){ feedbackCallback(goal_handler, fd); };
+      [this](auto goal_handler, const auto fd){ actionClientFeedbackCallback(goal_handler, fd); };
     send_goal_options_.result_callback =
-      [this](const auto result){ resultCallback(result); };
+      [this](const auto result){ actionClientResultCallback(result); };
   }
-
   CustomWidget::~CustomWidget() {}
+
 
   void CustomWidget::saveSettings([[maybe_unused]] qt_gui_cpp::Settings& plugin_settings, qt_gui_cpp::Settings& instance_settings) const
   {
@@ -172,6 +172,50 @@ namespace rqt_plugin
     }
 
     RCLCPP_INFO_STREAM(node_->get_logger(), "Finished move base action with " << result.result->result_code << " result code.");
+    ui_.labelActionStatus->setText(QString::fromStdString(std::string{STATUS_MSG} + std::string{"online"}));
+  }
+
+  template <typename T>
+  void CustomWidget::actionClientGoalResponseCallback(const T t)
+  {
+    if (!t)
+    {
+      RCLCPP_ERROR_STREAM(node_->get_logger(), "Move base goal was rejected!");
+    }
+    else
+    {
+      RCLCPP_INFO_STREAM(node_->get_logger(), "Move base goal was accepted, waiting for server result!");
+    }
+  }
+
+  template <typename T, typename U>
+  void CustomWidget::actionClientFeedbackCallback([[maybe_unused]] T t, const U u)
+  {
+    ui_.labelActionStatus->setText(QString::fromStdString(std::string{STATUS_MSG} + std::string{"running (" + std::to_string(u->progress) + "%"}));
+  }
+
+  template <typename T>
+  void CustomWidget::actionClientResultCallback(const T t)
+  {
+    switch (t.code)
+    {
+      case rclcpp_action::ResultCode::SUCCEEDED:
+        break;
+
+      case rclcpp_action::ResultCode::ABORTED:
+        RCLCPP_ERROR_STREAM(node_->get_logger(), "Move base goal was aborted.");
+        break;
+
+      case rclcpp_action::ResultCode::CANCELED:
+        RCLCPP_ERROR_STREAM(node_->get_logger(), "Move base goal was cancelled.");
+        break;
+
+      default:
+        RCLCPP_ERROR_STREAM(node_->get_logger(), "Unknown result code!");
+        break;
+    }
+
+    RCLCPP_INFO_STREAM(node_->get_logger(), "Finished move base action with " << t.result->result_code << " result code.");
     ui_.labelActionStatus->setText(QString::fromStdString(std::string{STATUS_MSG} + std::string{"online"}));
   }
 
