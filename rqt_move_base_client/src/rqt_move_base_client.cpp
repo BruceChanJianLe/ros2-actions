@@ -4,6 +4,7 @@
 #include <QStringList>
 #include <qnamespace.h>
 #include <QValidator>
+#include <rclcpp/logging.hpp>
 
 PLUGINLIB_EXPORT_CLASS(rqt_plugin::RQTMoveBaseClient, rqt_gui_cpp::Plugin)
 
@@ -31,11 +32,11 @@ namespace rqt_plugin
     // Update action client callbacks
     send_goal_options_ = rclcpp_action::Client<move_base_msgs::action::MoveBase>::SendGoalOptions();
     send_goal_options_.goal_response_callback =
-      [this](const std::shared_ptr<rclcpp_action::ClientGoalHandle<move_base_msgs::action::MoveBase>> goal_handler){ goalResponseCallback(goal_handler); };
+      [this](const auto goal_handler){ goalResponseCallback(goal_handler); };
     send_goal_options_.feedback_callback =
-      [this](std::shared_ptr<rclcpp_action::ClientGoalHandle<move_base_msgs::action::MoveBase>>goal_handler, const std::shared_ptr<const move_base_msgs::action::MoveBase::Feedback> fd){ feedbackCallback(goal_handler, fd); };
+      [this](auto goal_handler, const auto fd){ feedbackCallback(goal_handler, fd); };
     send_goal_options_.result_callback =
-      [this](const rclcpp_action::ClientGoalHandle<move_base_msgs::action::MoveBase>::WrappedResult result){ resultCallback(result); };
+      [this](const auto result){ resultCallback(result); };
   }
 
   CustomWidget::~CustomWidget() {}
@@ -107,15 +108,14 @@ namespace rqt_plugin
 
     if ((!is_srv_online_ || verify))
     {
-      ui_.labelActionStatus->setText(QString::fromStdString(std::string{STATUS_MSG} + std::string{"offline"}));
-      RCLCPP_INFO_STREAM(node_->get_logger(), "Waiting for move base action server not available after waiting.");
       if (!mb_action_clt_->wait_for_action_server(std::chrono::seconds(2)))
       {
+        ui_.labelActionStatus->setText(QString::fromStdString(std::string{STATUS_MSG} + std::string{"offline"}));
         RCLCPP_WARN_STREAM(node_->get_logger(), "Move base action server not available at the moment, retrying.");
       }
       else
       {
-        RCLCPP_INFO_STREAM(node_->get_logger(), "Move base action server is running.");
+        RCLCPP_INFO_STREAM_EXPRESSION(node_->get_logger(), !verify, "Move base action server is running.");
         is_srv_online_ = true;
       ui_.labelActionStatus->setText(QString::fromStdString(std::string{STATUS_MSG} + std::string{"online"}));
       }
