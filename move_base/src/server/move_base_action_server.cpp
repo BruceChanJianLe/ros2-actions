@@ -8,10 +8,9 @@ namespace mb
     mb_action_srv_ = rclcpp_action::create_server<move_base_msgs::action::MoveBase>(
         this,
         MB_SERVER_NAME,
-        [this](const rclcpp_action::GoalUUID & uuid, std::shared_ptr<const move_base_msgs::action::MoveBase::Goal> goal
-        ){ return this->handleGoal(uuid, goal); },
-        [this](const std::shared_ptr<const rclcpp_action::ServerGoalHandle<move_base_msgs::action::MoveBase>> goal_handler){ return this->handleCancel(goal_handler); },
-        [this](const std::shared_ptr<rclcpp_action::ServerGoalHandle<move_base_msgs::action::MoveBase>> goal_handler){ this->handleAccepted(goal_handler); }
+        [this](const auto &uuid, auto goal){ return handleGoal(uuid, goal); },
+        [this](const auto goal_handler){ return handleCancel(goal_handler); },
+        [this](const auto goal_handler){ handleAccepted(goal_handler); }
         );
 
     RCLCPP_INFO_STREAM(get_logger(), "Move base action server started!");
