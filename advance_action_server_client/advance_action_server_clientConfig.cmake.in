@@ -1,0 +1,14 @@
+# - Config file for the advance_action_server_client package
+# It defines the following variables
+#  advance_action_server_client_INCLUDE_DIRS - include directories for FooBar
+#  advance_action_server_client_LIBRARIES    - libraries to link against
+#  advance_action_server_client_EXECUTABLE   - the bar executable
+
+set(advance_action_server_client_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
+
+# Our library dependencies (contains definitions for IMPORTED targets)
+include("${advance_action_server_client_DIR}/export_advance_action_server_client.cmake")
+
+# These are IMPORTED targets created by advance_action_server_clientTargets.cmake
+
+
