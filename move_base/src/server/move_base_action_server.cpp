@@ -33,7 +33,7 @@ namespace mb
   }
 
   rclcpp_action::CancelResponse MoveBaseActionServer::handleCancel(
-      const std::shared_ptr<const rclcpp_action::ServerGoalHandle<move_base_msgs::action::MoveBase>> goal_handler
+      [[maybe_unused]] const std::shared_ptr<const rclcpp_action::ServerGoalHandle<move_base_msgs::action::MoveBase>> goal_handler
       )
   {
     RCLCPP_INFO_STREAM(get_logger(), "Received request to cancel goal!");
