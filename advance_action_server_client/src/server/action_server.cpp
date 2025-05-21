@@ -1,8 +1,4 @@
 #include "advance_action_server_client/server/action_server.hpp"
-#include "move_base_msgs/action/move_base.hpp"
-#include <memory>
-#include <rclcpp_action/create_server.hpp>
-#include <rclcpp_action/server.hpp>
 
 namespace amb
 {
