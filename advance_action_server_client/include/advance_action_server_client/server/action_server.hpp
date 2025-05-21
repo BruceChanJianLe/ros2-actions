@@ -54,7 +54,8 @@ namespace amb
           oss << "-";
         }
       }
-      return oss.str();}
+      return oss.str();
+    }
 
   private:
     rclcpp_action::Server<move_base_msgs::action::MoveBase>::SharedPtr amb_ac_srv_;
@@ -63,6 +64,8 @@ namespace amb
     std::mutex execution_mutex_;
 
     auto validateGoal(std::shared_ptr<const move_base_msgs::action::MoveBase::Goal> goal) -> bool;
+    auto stopExecution(const std::string& goal_id) -> void;
+    auto stopAllExecutions() -> void;
   };
 
 } // amb

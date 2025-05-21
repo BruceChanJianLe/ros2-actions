@@ -1,4 +1,6 @@
 #include "advance_action_server_client/server/action_server.hpp"
+#include "move_base_msgs/action/move_base.hpp"
+#include <memory>
 #include <rclcpp_action/create_server.hpp>
 #include <rclcpp_action/server.hpp>
 
@@ -70,7 +72,7 @@ namespace amb
       ) -> void
   {
     auto goal_id = uuidtos(gh->get_goal_id());
-    RCLCPP_INFO(this->get_logger(), "Goal accepted: %s", goal_id.c_str());
+    RCLCPP_INFO_STREAM(get_logger(), "Goal accepted: " << goal_id);
 
     // Create cancellation flag for this goal
     std::shared_ptr<std::atomic<bool>> cancellation_flag = 
@@ -97,7 +99,80 @@ namespace amb
       std::shared_ptr<std::atomic<bool>> cancellation_flag
       ) -> void
   {
+    // Obtain current goal and goal id
+    const auto goal = goal_handler->get_goal();
+    const auto goal_id = uuidtos(goal_handler->get_goal_id());
+    // Place holder for feedback and result
+    auto feedback = std::make_shared<move_base_msgs::action::MoveBase::Feedback>();
+    auto result = std::make_shared<move_base_msgs::action::MoveBase::Result>();
 
+    RCLCPP_INFO_STREAM(get_logger(), "Executing advance move base goal("
+        << goal_id << ")");
+
+    // Check if goal is still active
+    if (goal_handler->is_canceling())
+    {
+      RCLCPP_INFO_STREAM(get_logger(), "Cancelling goal (" << goal_id << ") before processing.");
+      result->result_code = move_base_msgs::action::MoveBase::Result::CANCELLED;
+      goal_handler->canceled(result);
+      stopExecution(goal_id);
+      return;
+    }
+
+    // Timeout check
+    const auto start_time = now();
+    const auto feeback_period = rclcpp::Duration::from_seconds(1.0);
+    const auto timeout_duration = rclcpp::Duration::from_seconds(60.0);
+
+    rclcpp::Rate loop_rate{1};
+    double remaining_distance{100.0};
+    // Main work
+    while (rclcpp::ok())
+    {
+      // Handle timeout
+      if ((now() - start_time) > timeout_duration)
+      {
+        RCLCPP_ERROR_STREAM(get_logger(), "Time one for goal ("
+            << goal_id << ")");
+        result->result_code = move_base_msgs::action::MoveBase::Result::FAILED;
+        goal_handler->abort(result);
+        stopExecution(goal_id);
+        return;
+      }
+
+      // Handle cancellation
+      if (*cancellation_flag || goal_handler->is_canceling())
+      {
+        RCLCPP_INFO_STREAM(get_logger(), "Cancelling goal (" <<
+            goal_id << ") during processing.");
+        result->result_code = move_base_msgs::action::MoveBase::Result::CANCELLED;
+        goal_handler->canceled(result);
+        stopExecution(goal_id);
+        return;
+      }
+
+      // Simulating task execution with regular feedback
+      remaining_distance -= 5.0;
+      feedback->progress = std::max(remaining_distance, 0.0);
+
+      // Publish feedback
+      goal_handler->publish_feedback(feedback);
+      RCLCPP_INFO_STREAM(get_logger(), "Feedback goal (" << goal_id <<
+          "), remaining distance: " << remaining_distance);
+
+      // Mark sucession (not failing in this example)
+      if (remaining_distance == 0.0)
+      {
+        RCLCPP_INFO_STREAM(get_logger(), "Goal (" << goal_id << ") succeeded.");
+        result->result_code = move_base_msgs::action::MoveBase::Result::SUCCESS;
+        goal_handler->succeed(result);
+        stopExecution(goal_id);
+        return;
+      }
+
+      // Sleep to not halt cpu resource (good practice)
+      loop_rate.sleep();
+    }
   }
 
   auto MoveBaseActionServer::validateGoal(std::shared_ptr<const move_base_msgs::action::MoveBase::Goal> goal) -> bool
@@ -111,5 +186,49 @@ namespace amb
     }
     
     return true;
+  }
+
+  auto MoveBaseActionServer::stopExecution(const std::string& goal_id) -> void
+  {
+    std::lock_guard<std::mutex> lock(execution_mutex_);
+
+    // Remove the cancellation flag
+    if (cancellation_flags_.count(goal_id) > 0)
+    {
+      cancellation_flags_.erase(goal_id);
+    }
+
+    // Detach the thread so it can finish properly
+    if (execution_threads_.count(goal_id) > 0)
+    {
+      if (execution_threads_[goal_id]->joinable())
+      {
+        execution_threads_[goal_id]->detach();
+      }
+      execution_threads_.erase(goal_id);
+    }
+  }
+
+  auto MoveBaseActionServer::stopAllExecutions() -> void
+  {
+    std::lock_guard<std::mutex> lock(execution_mutex_);
+
+    // Set all cancellation flags
+    for (auto& [_, flag] : cancellation_flags_)
+    {
+      *(flag) = true;
+    }
+
+    // Join all threads
+    for (auto& [_, thread] : execution_threads_)
+    {
+      if (thread->joinable())
+      {
+        thread->join();
+      }
+    }
+
+    cancellation_flags_.clear();
+    execution_threads_.clear();
   }
 } // amb

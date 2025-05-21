@@ -53,6 +53,7 @@ target_include_directories(${LIBRARY_NAME}_server PRIVATE
 
 # create action server node
 add_executable(${LIBRARY_NAME}_server_node
+  ./src/server/action_server.cpp
   ./src/server/action_server_node.cpp
 )
 ament_target_dependencies(${LIBRARY_NAME}_server_node ${dependencies_pkgs})
@@ -60,21 +61,28 @@ target_include_directories(${LIBRARY_NAME}_server_node PRIVATE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
-target_link_libraries(${LIBRARY_NAME}_server_node ${LIBRARY_NAME}_server)
+# target_link_libraries(${LIBRARY_NAME}_server_node ${LIBRARY_NAME}_server)
 
-# # create action client node
-# add_executable(${LIBRARY_NAME}_client_node
-#   ./src/client/action_client_node.cpp
-# )
-# ament_target_dependencies(${LIBRARY_NAME}_client_node ${dependencies_pkgs})
-# target_include_directories(${LIBRARY_NAME}_client_node PRIVATE
-#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-#   $<INSTALL_INTERFACE:include>
-# )
+# create action client node
+add_executable(${LIBRARY_NAME}_client_node
+  ./src/client/action_client.cpp
+  ./src/client/action_client_node.cpp
+)
+ament_target_dependencies(${LIBRARY_NAME}_client_node ${dependencies_pkgs})
+target_include_directories(${LIBRARY_NAME}_client_node PRIVATE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
 # target_link_libraries(${LIBRARY_NAME}_client_node ${LIBRARY_NAME}_client)
 
+# install libraries
+install(TARGETS ${LIBRARY_NAME}_server # ${LIBRARY_NAME}_client
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION lib
+)
 # install nodes
-install(TARGETS ${LIBRARY_NAME}_server_node # ${LIBRARY_NAME}_client_node
+install(TARGETS ${LIBRARY_NAME}_server_node ${LIBRARY_NAME}_client_node
   DESTINATION lib/${PROJECT_NAME}
 )
 

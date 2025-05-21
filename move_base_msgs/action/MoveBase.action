@@ -3,6 +3,10 @@ geometry_msgs/Pose goal
 ---
 #result definition
 int32 result_code
+
+int32 SUCCESS=0
+int32 FAILED=200
+int32 CANCELLED=201
 ---
 #feedback definition
 float64 progress
