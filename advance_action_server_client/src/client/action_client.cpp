@@ -120,7 +120,6 @@ namespace amb
       ) -> void
   {
     std::lock_guard<std::mutex> lock(goal_mutex_);
-    goal_active_ = false;
     auto goal_id = uuidtos(goal_handle.goal_id);
 
     switch (goal_handle.code)
