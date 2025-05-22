@@ -63,7 +63,7 @@ namespace mb
     }
   }
 
-  void MoveBaseActionClient::feedbackCallback(std::shared_ptr<rclcpp_action::ClientGoalHandle<move_base_msgs::action::MoveBase>> goal_handler, const std::shared_ptr<const move_base_msgs::action::MoveBase::Feedback> feedback)
+  void MoveBaseActionClient::feedbackCallback([[maybe_unused]] std::shared_ptr<rclcpp_action::ClientGoalHandle<move_base_msgs::action::MoveBase>> goal_handler, const std::shared_ptr<const move_base_msgs::action::MoveBase::Feedback> feedback)
   {
     RCLCPP_INFO_STREAM(get_logger(), "Move Base Progress: " << feedback->progress << "%");
   }
