@@ -47,7 +47,6 @@ namespace amb
   private:
     rclcpp_action::Client<move_base_msgs::action::MoveBase>::SharedPtr amb_ac_clt_;
     std::mutex goal_mutex_;
-    std::atomic<bool> goal_active_;
     std::unordered_map<std::string, std::shared_ptr<rclcpp_action::ClientGoalHandle<move_base_msgs::action::MoveBase>>
 > lookup;
 
