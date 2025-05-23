@@ -226,7 +226,7 @@ namespace amb
       thread_stopping_flag_ = true;
     }
 
-    // Notify all thrads to stop
+    // Notify all threads to stop
     cv_.notify_all();
 
     // Stop all execution and wait for thread to join
