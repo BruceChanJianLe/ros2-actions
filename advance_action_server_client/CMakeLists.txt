@@ -63,6 +63,17 @@ target_include_directories(${LIBRARY_NAME}_server_node PRIVATE
 )
 # target_link_libraries(${LIBRARY_NAME}_server_node ${LIBRARY_NAME}_server)
 
+# create action server thread pool node
+add_executable(${LIBRARY_NAME}_server_tp_node
+  ./src/server/action_server_thread_pool.cpp
+  ./src/server/action_server_thread_pool_node.cpp
+)
+ament_target_dependencies(${LIBRARY_NAME}_server_tp_node ${dependencies_pkgs})
+target_include_directories(${LIBRARY_NAME}_server_tp_node PRIVATE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+
 # create action client node
 add_executable(${LIBRARY_NAME}_client_node
   ./src/client/action_client.cpp
@@ -82,7 +93,7 @@ install(TARGETS ${LIBRARY_NAME}_server # ${LIBRARY_NAME}_client
   RUNTIME DESTINATION lib
 )
 # install nodes
-install(TARGETS ${LIBRARY_NAME}_server_node ${LIBRARY_NAME}_client_node
+install(TARGETS ${LIBRARY_NAME}_server_node ${LIBRARY_NAME}_client_node ${LIBRARY_NAME}_server_tp_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
